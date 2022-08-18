@@ -13,3 +13,7 @@ sleep 10
 service zerotier-one stop
 rm /var/lib/zerotier-one/identity.*
 service zerotier-one start
+
+# Display ZeroTier id once
+_ZT_ID=$(zerotier-cli info | cut -d ' ' -f3 | xargs)
+printf "My ZeroTier ID is %s\n" "$_ZT_ID"
