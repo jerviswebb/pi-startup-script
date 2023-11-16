@@ -9,6 +9,10 @@ done
 
 sleep 10
 
+# Regenerate SSH keys
+rm /etc/ssh/ssh_host*
+ssh-keygen -A
+
 # Reset ZeroTier node id
 service zerotier-one stop
 rm /var/lib/zerotier-one/identity.*
