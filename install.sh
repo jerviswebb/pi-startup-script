@@ -1,23 +1,35 @@
 #!/bin/bash
 
-while true; do
-    if [ $(systemctl is-active zerotier-one) = "active" ]; then
-        break
-    fi
-    sleep 1
-done
+if [ -f "/opt/.do_not_remove" ]; then
+        exit 0
+fi
 
-sleep 10
+# Expand the filesystem
+raspi-config --expand-rootfs
 
 # Regenerate SSH keys
+echo "Regenerating SSH keys..."
 rm /etc/ssh/ssh_host*
 ssh-keygen -A
 
 # Reset ZeroTier node id
+echo "Regenerating ZT ID..."
 service zerotier-one stop
 rm /var/lib/zerotier-one/identity.*
 service zerotier-one start
 
-# Display ZeroTier id once
-_ZT_ID=$(zerotier-cli info | cut -d ' ' -f3 | xargs)
-printf "My ZeroTier ID is %s\n" "$_ZT_ID"
+# Join Jerviswebb network
+echo -n "Joining ZT network"
+while ! [[ $(zerotier-cli info) == *"ONLINE"* ]]; do
+        echo -n "."
+        sleep 1
+done
+zerotier-cli join b15644912ecb5544
+echo ""
+echo "ZT network joined."
+
+# Adds file to prevent script run
+echo "Creating do_not_remove file..."
+touch /opt/.do_not_remove
+
+echo "Finished."
